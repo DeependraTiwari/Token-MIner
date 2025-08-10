@@ -1,0 +1,9 @@
+.user-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 247, 255, 0.3); /* neon cyan glow with ~30% opacity */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

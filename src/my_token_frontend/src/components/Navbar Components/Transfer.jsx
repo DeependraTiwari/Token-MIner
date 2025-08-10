@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import { useAuth } from '../../AuthProvider';
+import envelopeIcon from '../../assets/Token-Transfer.png'; // adjust path if needed
+
+const Transfer = () => {
+  const [receiver, setReceiver] = useState('');
+  const [amount, setAmount] = useState('');
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { callFunction } = useAuth();
+
+  const handleTransfer = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus('');
+
+    try {
+      const result = await callFunction.transfer_to(receiver, amount.toString());
+      setStatus(`Transfer status: ${result}`);
+      if(amount == 0){alert('Amount cannot be zero')}
+      if(amount != 0 && result == 'Failed') { alert('Either you are Transfering to yourself or you do not have sufficient Balance' )}
+    } catch (err) {
+      console.error("Transfer failed:", err);
+      setStatus('❌ Transfer failed. Check console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.card}>
+        {/* Envelope icon */}
+        <img src={envelopeIcon} alt="Transfer Icon" style={styles.icon} />
+
+        <h2 style={styles.title}> Transfer Tokens</h2>
+        <form onSubmit={handleTransfer} style={styles.form}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Receiver Principal:</label>
+            <textarea
+              value={receiver}
+              onChange={(e) => setReceiver(e.target.value)}
+              required
+              style={styles.principalBox}
+              placeholder="Enter receiver principal"
+              rows={2}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Amount:</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={amount}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d*$/.test(val)) setAmount(val);
+              }}
+              required
+              style={styles.amountBox}
+              placeholder="Enter amount (u128)"
+            />
+          </div>
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? '⚡ Transferring...' : '🚀 Transfer'}
+          </button>
+        </form>
+        {status && <p style={styles.status}>{status}</p>}
+      </div>
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    padding: '40px',
+    background: 'radial-gradient(circle at center, #0f172a 0%, #000000 100%)', // dark navy to black
+    minHeight: '100vh',
+    fontFamily: `'Inter', sans-serif`,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  card: {
+    width: '100%',
+    maxWidth: '600px',
+    background: 'rgba(15, 23, 42, 0.75)', // semi-transparent navy
+    backdropFilter: 'blur(16px)',
+    borderRadius: '16px',
+    border: '1px solid rgba(0, 247, 255, 0.3)', // cyan border
+    boxShadow: '0 0 20px rgba(0, 247, 255, 0.2)', // cyan glow
+    padding: '30px 40px',
+    color: '#e0faff',
+    textAlign: 'center',
+  },
+  icon: {
+    width: '100px',
+    marginBottom: '15px',
+    animation: 'float 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate',
+  },
+  title: {
+    fontSize: '26px',
+    marginBottom: '25px',
+    fontWeight: 700,
+    color: '#00f7ff', // cyan text
+    borderBottom: '2px solid rgba(0, 247, 255, 0.4)',
+    paddingBottom: '10px',
+    textShadow: '0 0 6px rgba(0, 247, 255, 0.5)',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  label: {
+    fontSize: '16px',
+    color: '#00f7ff',
+    marginBottom: '8px',
+    fontWeight: 'bold',
+  },
+  principalBox: {
+    width: '100%',
+    padding: '12px',
+    fontSize: '16px',
+    fontFamily: 'monospace',
+    border: '1px solid rgba(0, 247, 255, 0.3)',
+    borderRadius: '8px',
+    outline: 'none',
+    resize: 'none',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: '#00f7ff',
+    boxShadow: '0 0 8px rgba(0, 247, 255, 0.2)',
+  },
+  amountBox: {
+    width: '100%',
+    padding: '12px',
+    fontSize: '16px',
+    fontFamily: 'monospace',
+    border: '1px solid rgba(0, 247, 255, 0.3)',
+    borderRadius: '8px',
+    outline: 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: '#00f7ff',
+    boxShadow: '0 0 8px rgba(0, 247, 255, 0.2)',
+  },
+  button: {
+    width: '100%',
+    padding: '14px',
+    fontSize: '16px',
+    background: 'linear-gradient(90deg, #00f7ff, #06b6d4)', // cyan gradient
+    color: '#000',
+    fontWeight: 'bold',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    boxShadow: '0 0 10px rgba(0, 247, 255, 0.4)',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  },
+  status: {
+    marginTop: '20px',
+    fontSize: '16px',
+    color: '#00f7ff',
+    whiteSpace: 'pre-wrap',
+    textShadow: '0 0 6px rgba(0, 247, 255, 0.5)',
+  },
+};
+
+// Inject animation styles into document head
+const animationStyles = `
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes glow {
+  0% { filter: drop-shadow(0 0 3px #00f7ff) drop-shadow(0 0 6px #00f7ff); }
+  100% { filter: drop-shadow(0 0 8px #00f7ff) drop-shadow(0 0 15px #00f7ff); }
+}
+`;
+if (typeof document !== 'undefined') {
+  const styleEl = document.createElement('style');
+  styleEl.innerHTML = animationStyles;
+  document.head.appendChild(styleEl);
+}
+
+export default Transfer;
